@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Deal CRM{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <header class="app-header">
+    <div class="app-header__inner">
+      <a class="brand" href="{{ url_for('index') }}">
+        <span class="brand__name">Deal <em>CRM</em></span>
+      </a>
+      <span class="app-header__meta">Pipeline workspace</span>
+    </div>
+  </header>
+
+  <main class="page" id="top">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+      <div class="flash-stack">
+        {% for category, message in messages %}
+        <div class="flash flash--{{ category }}" role="{{ 'alert' if category == 'error' else 'status' }}">
+          <span class="flash__icon" aria-hidden="true">{{ '!' if category == 'error' else '✓' }}</span>
+          <div class="flash__body">{{ message }}</div>
+          <a class="flash__close" href="{{ request.path }}" aria-label="Dismiss">×</a>
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+    {% endwith %}
+
+    {% block content %}{% endblock %}
+  </main>
+</body>
+</html>

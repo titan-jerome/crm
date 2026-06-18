@@ -1,0 +1,14 @@
+# Local SQLite database — runtime data, not source
+deals.db
+deals.db-journal
+deals.db-wal
+deals.db-shm
+
+# Python
+__pycache__/
+*.py[cod]
+
+# Virtual environments
+.venv/
+venv/
+env/
