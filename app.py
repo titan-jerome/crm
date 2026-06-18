@@ -101,6 +101,11 @@ def form_values(source):
     return {field: source.get(field, "") for field in FIELDS}
 
 
+# Templates render the add/edit forms as modals and need to normalize values
+# (a Row for an existing deal, a rejected submission, or None for a blank form).
+app.jinja_env.globals["form_values"] = form_values
+
+
 @app.template_filter("currency")
 def currency(value):
     """Render an integer dollar amount as e.g. $2,500,000 ("—" when empty)."""
@@ -113,8 +118,10 @@ def currency(value):
 
 # --- Routes -----------------------------------------------------------------
 
-@app.route("/")
-def index():
+def render_index(add_open=False, edit_error_id=None, form_error=None, submitted=None):
+    """Render the deals list. The add/edit forms live in modals on this page;
+    on a validation error the relevant modal is re-opened with the submitted
+    values (`submitted`) and an inline message (`form_error`)."""
     sort = request.args.get("sort", DEFAULT_SORT)
     direction = request.args.get("dir", DEFAULT_DIR).lower()
     if sort not in SORTABLE_COLUMNS:
@@ -138,7 +145,16 @@ def index():
         deal_count=len(deals),
         total_ebitda=total_ebitda,
         total_valuation=total_valuation,
+        add_open=add_open,
+        edit_error_id=edit_error_id,
+        form_error=form_error,
+        submitted=submitted,
     )
+
+
+@app.route("/")
+def index():
+    return render_index()
 
 
 @app.route("/add", methods=["GET", "POST"])
@@ -146,11 +162,7 @@ def add():
     if request.method == "POST":
         error, values = _read_form(request.form)
         if error:
-            flash(error, "error")
-            return render_template(
-                "form.html", deal=form_values(request.form),
-                action=url_for("add"), title="Add deal",
-            )
+            return render_index(add_open=True, form_error=error, submitted=request.form)
         db = get_db()
         db.execute(
             "INSERT INTO deals (company_name, ebitda, valuation, notes, drive_link) "
@@ -161,9 +173,8 @@ def add():
         flash(f"Added “{values[0]}”.", "success")
         return redirect(url_for("index"))
 
-    return render_template(
-        "form.html", deal=form_values(None), action=url_for("add"), title="Add deal"
-    )
+    # The add form is a modal on the index page; open it via the URL fragment.
+    return redirect(url_for("index") + "#add-deal")
 
 
 @app.route("/edit/<int:deal_id>", methods=["GET", "POST"])
@@ -177,11 +188,7 @@ def edit(deal_id):
     if request.method == "POST":
         error, values = _read_form(request.form)
         if error:
-            flash(error, "error")
-            return render_template(
-                "form.html", deal=form_values(request.form),
-                action=url_for("edit", deal_id=deal_id), title="Edit deal",
-            )
+            return render_index(edit_error_id=deal_id, form_error=error, submitted=request.form)
         db.execute(
             "UPDATE deals SET company_name = ?, ebitda = ?, valuation = ?, "
             "notes = ?, drive_link = ? WHERE id = ?",
@@ -191,10 +198,8 @@ def edit(deal_id):
         flash(f"Updated “{values[0]}”.", "success")
         return redirect(url_for("index"))
 
-    return render_template(
-        "form.html", deal=form_values(deal),
-        action=url_for("edit", deal_id=deal_id), title="Edit deal",
-    )
+    # The edit form is a modal on the index page; open it via the URL fragment.
+    return redirect(url_for("index") + "#edit-deal-" + str(deal_id))
 
 
 @app.route("/delete/<int:deal_id>", methods=["POST"])

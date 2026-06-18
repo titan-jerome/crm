@@ -1,0 +1,64 @@
+{# Reusable add/edit deal modal (CSS-only :target popup).
+   `values` may be a deal Row, a submitted form, or None — form_values()
+   (registered as a Jinja global in app.py) normalizes it. When `is_open` is
+   true the modal is force-opened server-side (after a validation error), so
+   its close links reload the list rather than just clearing the URL fragment. #}
+{% macro deal_modal(modal_id, title, action, submit_label, values, error, is_open) %}
+  {% set v = form_values(values) %}
+  {% set close_href = url_for('index') if is_open else '#top' %}
+  <div class="modal{% if is_open %} is-open{% endif %}" id="{{ modal_id }}"
+       role="dialog" aria-modal="true" aria-labelledby="{{ modal_id }}-title">
+    <a class="modal__backdrop" href="{{ close_href }}" aria-label="Close"></a>
+    <div class="modal__dialog">
+      <div class="modal__head">
+        <h2 id="{{ modal_id }}-title">{{ title }}</h2>
+        <a class="modal__close" href="{{ close_href }}" aria-label="Close">×</a>
+      </div>
+      <form class="form" method="post" action="{{ action }}" novalidate>
+        {% if error %}
+        <div class="modal__notice">
+          <div class="flash flash--error" role="alert">
+            <span class="flash__icon" aria-hidden="true">!</span>
+            <div class="flash__body">{{ error }}</div>
+          </div>
+        </div>
+        {% endif %}
+        <div class="field">
+          <label class="field__label" for="{{ modal_id }}-company">Company name <span class="req" aria-hidden="true">*</span></label>
+          <input class="input" id="{{ modal_id }}-company" name="company_name" type="text" required
+                 value="{{ v.company_name }}" placeholder="Acme Corp." autocomplete="off">
+        </div>
+        <div class="field">
+          <label class="field__label" for="{{ modal_id }}-ebitda">Estimated EBITDA</label>
+          <div class="input-money">
+            <span class="input-money__prefix" aria-hidden="true">$</span>
+            <input class="input" id="{{ modal_id }}-ebitda" name="ebitda" type="text" inputmode="numeric"
+                   placeholder="2500000" value="{{ v.ebitda }}" autocomplete="off">
+          </div>
+        </div>
+        <div class="field">
+          <label class="field__label" for="{{ modal_id }}-valuation">Estimated valuation</label>
+          <div class="input-money">
+            <span class="input-money__prefix" aria-hidden="true">$</span>
+            <input class="input" id="{{ modal_id }}-valuation" name="valuation" type="text" inputmode="numeric"
+                   placeholder="12000000" value="{{ v.valuation }}" autocomplete="off">
+          </div>
+        </div>
+        <div class="field">
+          <label class="field__label" for="{{ modal_id }}-drive">Google Drive folder link</label>
+          <input class="input" id="{{ modal_id }}-drive" name="drive_link" type="url"
+                 placeholder="https://drive.google.com/..." value="{{ v.drive_link }}" autocomplete="off">
+        </div>
+        <div class="field">
+          <label class="field__label" for="{{ modal_id }}-notes">Notes</label>
+          <textarea class="textarea" id="{{ modal_id }}-notes" name="notes"
+                    placeholder="Deal context, diligence findings, next steps…">{{ v.notes }}</textarea>
+        </div>
+        <div class="form-actions">
+          <button class="btn btn--primary" type="submit">{{ submit_label }}</button>
+          <a class="btn btn--ghost" href="{{ close_href }}">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </div>
+{% endmacro %}

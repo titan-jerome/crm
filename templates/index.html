@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% from "_modals.html" import deal_modal %}
 {% block title %}Deals · Deal CRM{% endblock %}
 
 {% macro sortable(col, label, sort, direction) %}
@@ -20,7 +21,7 @@
       {% if deals %}<div class="toolbar__sub">{{ deal_count }} {{ 'deal' if deal_count == 1 else 'deals' }} in pipeline</div>{% endif %}
     </div>
     <div class="toolbar__actions">
-      <a class="btn btn--primary" href="{{ url_for('add') }}"><span class="btn__plus" aria-hidden="true">+</span> Add deal</a>
+      <a class="btn btn--primary" href="#add-deal"><span class="btn__plus" aria-hidden="true">+</span> Add deal</a>
     </div>
   </div>
 
@@ -77,7 +78,7 @@
             </td>
             <td class="col-num" data-label="Actions">
               <div class="actions">
-                <a class="link-action" href="{{ url_for('edit', deal_id=deal.id) }}">Edit</a>
+                <a class="link-action" href="#edit-deal-{{ deal.id }}">Edit</a>
                 <form method="post" action="{{ url_for('delete', deal_id=deal.id) }}"
                       onsubmit="return confirm('Delete this deal? This cannot be undone.');">
                   <button class="btn-delete" type="submit">Delete</button>
@@ -101,8 +102,22 @@
       </div>
       <h2 class="empty__title">No deals yet</h2>
       <p class="empty__text">Start building your pipeline by adding your first deal.</p>
-      <a class="btn btn--primary" href="{{ url_for('add') }}"><span class="btn__plus" aria-hidden="true">+</span> Add your first deal</a>
+      <a class="btn btn--primary" href="#add-deal"><span class="btn__plus" aria-hidden="true">+</span> Add your first deal</a>
     </div>
   </div>
   {% endif %}
+
+  {# --- Add / Edit modals (CSS-only :target popups) --- #}
+  {{ deal_modal('add-deal', 'Add deal', url_for('add'), 'Save deal',
+                submitted if add_open else none,
+                form_error if add_open else none,
+                add_open) }}
+
+  {% for deal in deals %}
+    {% set is_err = (edit_error_id is not none and edit_error_id == deal.id) %}
+    {{ deal_modal('edit-deal-' ~ deal.id, 'Edit deal', url_for('edit', deal_id=deal.id), 'Save changes',
+                  submitted if is_err else deal,
+                  form_error if is_err else none,
+                  is_err) }}
+  {% endfor %}
 {% endblock %}

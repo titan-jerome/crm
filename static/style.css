@@ -561,7 +561,8 @@ table.deals {
   z-index: 100;
   display: none;
 }
-.modal:target {
+.modal:target,
+.modal.is-open {
   display: flex;
   align-items: flex-start;
   justify-content: center;
@@ -587,7 +588,8 @@ table.deals {
   box-shadow: var(--shadow-lg);
   overflow: hidden;
 }
-.modal:target .modal__dialog { animation: modal-in 0.18s ease both; }
+.modal:target .modal__dialog,
+.modal.is-open .modal__dialog { animation: modal-in 0.18s ease both; }
 @keyframes modal-in {
   from { opacity: 0; transform: translateY(10px) scale(0.99); }
   to   { opacity: 1; transform: translateY(0) scale(1); }
@@ -666,7 +668,8 @@ table.deals {
   .actions { justify-content: flex-end; }
   .field, .form-actions { padding-left: 16px; padding-right: 16px; }
   .form-actions .btn { flex: 1; justify-content: center; }
-  .modal:target { padding: 0; align-items: stretch; }
+  .modal:target,
+  .modal.is-open { padding: 0; align-items: stretch; }
   .modal__dialog { max-width: none; border-radius: 0; min-height: 100%; border: none; }
   .modal__head { padding: 16px; }
   .modal__notice { padding: 14px 16px 0; }
