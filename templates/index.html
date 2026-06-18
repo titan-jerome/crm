@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block title %}Deals · Deal CRM{% endblock %}
+
+{% macro sortable(col, label, sort, direction) %}
+  {% set is_active = (sort == col) %}
+  {% set next_dir = 'desc' if (is_active and direction == 'asc') else 'asc' %}
+  <th class="{{ 'sorted' if is_active else '' }}">
+    <a href="{{ url_for('index', sort=col, dir=next_dir) }}">
+      {{ label }}
+      {% if is_active %}<span class="arrow">{{ '▲' if direction == 'asc' else '▼' }}</span>{% endif %}
+    </a>
+  </th>
+{% endmacro %}
+
+{% block content %}
+  <div class="toolbar">
+    <h1>Deals</h1>
+    <a class="btn btn-primary" href="{{ url_for('add') }}">+ Add deal</a>
+  </div>
+
+  {% if deals %}
+  <table class="deals">
+    <thead>
+      <tr>
+        {{ sortable('company_name', 'Company', sort, direction) }}
+        {{ sortable('ebitda', 'EBITDA', sort, direction) }}
+        {{ sortable('valuation', 'Valuation', sort, direction) }}
+        <th>Notes</th>
+        <th>Drive</th>
+        <th class="actions-col">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for deal in deals %}
+      <tr>
+        <td class="company">{{ deal.company_name }}</td>
+        <td class="num">{{ deal.ebitda | currency }}</td>
+        <td class="num">{{ deal.valuation | currency }}</td>
+        <td class="notes">{{ deal.notes or "—" }}</td>
+        <td>
+          {% if deal.drive_link %}
+            <a href="{{ deal.drive_link }}" target="_blank" rel="noopener noreferrer">Open ↗</a>
+          {% else %}—{% endif %}
+        </td>
+        <td class="actions">
+          <a class="btn btn-small" href="{{ url_for('edit', deal_id=deal.id) }}">Edit</a>
+          <form class="inline" method="post" action="{{ url_for('delete', deal_id=deal.id) }}"
+                onsubmit="return confirm('Delete “{{ deal.company_name }}”?');">
+            <button class="btn btn-small btn-danger" type="submit">Delete</button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <div class="empty">
+    <p>No deals yet.</p>
+    <a class="btn btn-primary" href="{{ url_for('add') }}">+ Add your first deal</a>
+  </div>
+  {% endif %}
+{% endblock %}

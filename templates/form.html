@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}{{ title }} · Deal CRM{% endblock %}
+
+{% block content %}
+  <div class="toolbar">
+    <h1>{{ title }}</h1>
+    <a class="btn" href="{{ url_for('index') }}">← Back</a>
+  </div>
+
+  <form class="deal-form" method="post" action="{{ action }}">
+    <label>
+      Company name <span class="req">*</span>
+      <input type="text" name="company_name" required
+             value="{{ deal.company_name }}" autofocus>
+    </label>
+
+    <div class="row">
+      <label>
+        Estimated EBITDA (USD)
+        <input type="text" name="ebitda" inputmode="decimal"
+               placeholder="e.g. 2500000" value="{{ deal.ebitda }}">
+      </label>
+      <label>
+        Estimated valuation (USD)
+        <input type="text" name="valuation" inputmode="decimal"
+               placeholder="e.g. 12000000" value="{{ deal.valuation }}">
+      </label>
+    </div>
+
+    <label>
+      Google Drive folder link
+      <input type="url" name="drive_link"
+             placeholder="https://drive.google.com/..." value="{{ deal.drive_link }}">
+    </label>
+
+    <label>
+      Notes
+      <textarea name="notes" rows="6" placeholder="Free-form notes…">{{ deal.notes }}</textarea>
+    </label>
+
+    <div class="form-actions">
+      <button class="btn btn-primary" type="submit">Save</button>
+      <a class="btn" href="{{ url_for('index') }}">Cancel</a>
+    </div>
+  </form>
+{% endblock %}

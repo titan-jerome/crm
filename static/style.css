@@ -1,0 +1,185 @@
+:root {
+  --bg: #f7f8fa;
+  --panel: #ffffff;
+  --border: #e2e5ea;
+  --text: #1f2430;
+  --muted: #6b7280;
+  --accent: #2563eb;
+  --accent-dark: #1d4ed8;
+  --danger: #dc2626;
+  --success-bg: #ecfdf5;
+  --success-border: #a7f3d0;
+  --error-bg: #fef2f2;
+  --error-border: #fecaca;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.container {
+  max-width: 1040px;
+  margin: 0 auto;
+  padding: 0 24px 64px;
+}
+
+.site-header {
+  padding: 20px 0;
+  margin-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+
+.brand {
+  font-weight: 700;
+  font-size: 18px;
+  color: var(--text);
+  text-decoration: none;
+  letter-spacing: -0.01em;
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 24px 0 16px;
+}
+
+h1 { font-size: 22px; margin: 0; }
+
+/* --- Buttons --- */
+.btn {
+  display: inline-block;
+  padding: 8px 14px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--panel);
+  color: var(--text);
+  text-decoration: none;
+  font-size: 14px;
+  cursor: pointer;
+  line-height: 1.2;
+}
+.btn:hover { border-color: #c9ced6; }
+.btn-primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+.btn-primary:hover { background: var(--accent-dark); border-color: var(--accent-dark); }
+.btn-small { padding: 5px 10px; font-size: 13px; }
+.btn-danger { color: var(--danger); }
+.btn-danger:hover { background: var(--error-bg); border-color: var(--error-border); }
+
+/* --- Flash messages --- */
+.flashes { margin: 12px 0; display: grid; gap: 8px; }
+.flash {
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  font-size: 14px;
+}
+.flash-success { background: var(--success-bg); border-color: var(--success-border); }
+.flash-error { background: var(--error-bg); border-color: var(--error-border); }
+
+/* --- Table --- */
+.deals {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.deals th, .deals td {
+  padding: 11px 14px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+.deals thead th {
+  background: #fafbfc;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+  white-space: nowrap;
+}
+.deals thead th a {
+  color: inherit;
+  text-decoration: none;
+}
+.deals thead th a:hover { color: var(--text); }
+.deals thead th.sorted { color: var(--text); }
+.arrow { font-size: 10px; margin-left: 2px; }
+.deals tbody tr:last-child td { border-bottom: none; }
+.deals tbody tr:hover { background: #fafbfc; }
+.company { font-weight: 600; }
+.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.deals thead th:nth-child(2), .deals thead th:nth-child(3) { text-align: right; }
+.notes { color: var(--muted); max-width: 320px; white-space: pre-wrap; }
+.actions { white-space: nowrap; }
+.actions .btn { margin-right: 4px; }
+.inline { display: inline; margin: 0; }
+
+/* --- Empty state --- */
+.empty {
+  text-align: center;
+  padding: 64px 24px;
+  background: var(--panel);
+  border: 1px dashed var(--border);
+  border-radius: 10px;
+  color: var(--muted);
+}
+.empty p { margin: 0 0 16px; }
+
+/* --- Form --- */
+.deal-form {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 24px;
+  max-width: 640px;
+  display: grid;
+  gap: 16px;
+}
+.deal-form label {
+  display: grid;
+  gap: 6px;
+  font-size: 14px;
+  font-weight: 600;
+}
+.deal-form .row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+.deal-form input,
+.deal-form textarea {
+  width: 100%;
+  padding: 9px 11px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font: inherit;
+  font-weight: 400;
+  color: var(--text);
+}
+.deal-form input:focus,
+.deal-form textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+.deal-form textarea { resize: vertical; }
+.req { color: var(--danger); }
+.form-actions { display: flex; gap: 10px; margin-top: 4px; }
+
+@media (max-width: 560px) {
+  .deal-form .row { grid-template-columns: 1fr; }
+}
