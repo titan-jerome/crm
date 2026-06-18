@@ -4,59 +4,105 @@
 {% macro sortable(col, label, sort, direction) %}
   {% set is_active = (sort == col) %}
   {% set next_dir = 'desc' if (is_active and direction == 'asc') else 'asc' %}
-  <th class="{{ 'sorted' if is_active else '' }}">
+  <th scope="col" class="th-sort{% if col in ('ebitda', 'valuation') %} col-num{% endif %}{% if is_active %} is-active{% endif %}"
+      {% if is_active %}aria-sort="{{ 'ascending' if direction == 'asc' else 'descending' }}"{% endif %}>
     <a href="{{ url_for('index', sort=col, dir=next_dir) }}">
       {{ label }}
-      {% if is_active %}<span class="arrow">{{ '▲' if direction == 'asc' else '▼' }}</span>{% endif %}
+      <span class="arrow" aria-hidden="true">{% if is_active %}{{ '▲' if direction == 'asc' else '▼' }}{% else %}▲▼{% endif %}</span>
     </a>
   </th>
 {% endmacro %}
 
 {% block content %}
   <div class="toolbar">
-    <h1>Deals</h1>
-    <a class="btn btn-primary" href="{{ url_for('add') }}">+ Add deal</a>
+    <div>
+      <h1 class="toolbar__title">Deals</h1>
+      {% if deals %}<div class="toolbar__sub">{{ deal_count }} {{ 'deal' if deal_count == 1 else 'deals' }} in pipeline</div>{% endif %}
+    </div>
+    <div class="toolbar__actions">
+      <a class="btn btn--primary" href="{{ url_for('add') }}"><span class="btn__plus" aria-hidden="true">+</span> Add deal</a>
+    </div>
   </div>
 
   {% if deals %}
-  <table class="deals">
-    <thead>
-      <tr>
-        {{ sortable('company_name', 'Company', sort, direction) }}
-        {{ sortable('ebitda', 'EBITDA', sort, direction) }}
-        {{ sortable('valuation', 'Valuation', sort, direction) }}
-        <th>Notes</th>
-        <th>Drive</th>
-        <th class="actions-col">Actions</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for deal in deals %}
-      <tr>
-        <td class="company">{{ deal.company_name }}</td>
-        <td class="num">{{ deal.ebitda | currency }}</td>
-        <td class="num">{{ deal.valuation | currency }}</td>
-        <td class="notes">{{ deal.notes or "—" }}</td>
-        <td>
-          {% if deal.drive_link %}
-            <a href="{{ deal.drive_link }}" target="_blank" rel="noopener noreferrer">Open ↗</a>
-          {% else %}—{% endif %}
-        </td>
-        <td class="actions">
-          <a class="btn btn-small" href="{{ url_for('edit', deal_id=deal.id) }}">Edit</a>
-          <form class="inline" method="post" action="{{ url_for('delete', deal_id=deal.id) }}"
-                onsubmit="return confirm('Delete “{{ deal.company_name }}”?');">
-            <button class="btn btn-small btn-danger" type="submit">Delete</button>
-          </form>
-        </td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
+  <section class="stats" aria-label="Pipeline summary">
+    <div class="stat">
+      <div class="stat__label">Total deals</div>
+      <div class="stat__value">{{ deal_count }}</div>
+    </div>
+    <div class="stat">
+      <div class="stat__label">Pipeline EBITDA</div>
+      <div class="stat__value stat__value--num">{{ total_ebitda | currency }}</div>
+    </div>
+    <div class="stat">
+      <div class="stat__label">Total valuation</div>
+      <div class="stat__value stat__value--num">{{ total_valuation | currency }}</div>
+    </div>
+  </section>
+
+  <div class="card">
+    <div class="table-wrap">
+      <table class="deals">
+        <thead>
+          <tr>
+            {{ sortable('company_name', 'Company', sort, direction) }}
+            {{ sortable('ebitda', 'EBITDA', sort, direction) }}
+            {{ sortable('valuation', 'Valuation', sort, direction) }}
+            <th scope="col">Notes</th>
+            <th scope="col">Drive</th>
+            <th scope="col" class="col-num">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for deal in deals %}
+          <tr>
+            <td class="cell-company" data-label="Company">
+              <span class="company">{{ deal.company_name }}</span>
+            </td>
+            <td class="col-num cell-num{% if deal.ebitda is none %} cell-num--empty{% endif %}" data-label="EBITDA">{{ deal.ebitda | currency }}</td>
+            <td class="col-num cell-num{% if deal.valuation is none %} cell-num--empty{% endif %}" data-label="Valuation">{{ deal.valuation | currency }}</td>
+            <td data-label="Notes">
+              {% if deal.notes %}
+                <div class="notes">{{ deal.notes }}</div>
+              {% else %}
+                <div class="notes notes--empty">—</div>
+              {% endif %}
+            </td>
+            <td data-label="Drive">
+              {% if deal.drive_link %}
+                <a class="drive-link" href="{{ deal.drive_link }}" target="_blank" rel="noopener noreferrer">Open <span class="ext" aria-hidden="true">↗</span></a>
+              {% else %}
+                <span class="muted">—</span>
+              {% endif %}
+            </td>
+            <td class="col-num" data-label="Actions">
+              <div class="actions">
+                <a class="link-action" href="{{ url_for('edit', deal_id=deal.id) }}">Edit</a>
+                <form method="post" action="{{ url_for('delete', deal_id=deal.id) }}"
+                      onsubmit="return confirm('Delete this deal? This cannot be undone.');">
+                  <button class="btn-delete" type="submit">Delete</button>
+                </form>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
   {% else %}
-  <div class="empty">
-    <p>No deals yet.</p>
-    <a class="btn btn-primary" href="{{ url_for('add') }}">+ Add your first deal</a>
+  <div class="card">
+    <div class="empty">
+      <div class="empty__art" aria-hidden="true">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 7a2 2 0 0 1 2-2h4l2 2h6a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+        </svg>
+      </div>
+      <h2 class="empty__title">No deals yet</h2>
+      <p class="empty__text">Start building your pipeline by adding your first deal.</p>
+      <a class="btn btn--primary" href="{{ url_for('add') }}"><span class="btn__plus" aria-hidden="true">+</span> Add your first deal</a>
+    </div>
   </div>
   {% endif %}
 {% endblock %}

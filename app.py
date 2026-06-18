@@ -126,7 +126,19 @@ def index():
         f"SELECT * FROM deals ORDER BY {sort} {direction}, id DESC"
     ).fetchall()
 
-    return render_template("index.html", deals=deals, sort=sort, direction=direction)
+    # Summary figures for the dashboard stat cards (NULLs count as 0).
+    total_ebitda = sum((d["ebitda"] or 0) for d in deals)
+    total_valuation = sum((d["valuation"] or 0) for d in deals)
+
+    return render_template(
+        "index.html",
+        deals=deals,
+        sort=sort,
+        direction=direction,
+        deal_count=len(deals),
+        total_ebitda=total_ebitda,
+        total_valuation=total_valuation,
+    )
 
 
 @app.route("/add", methods=["GET", "POST"])
